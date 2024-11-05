@@ -1,16 +1,34 @@
-# login.dfe.notifications.client
+# login.dfe.jobs-client
 
 [![tested with jest](https://img.shields.io/badge/tested_with-jest-99424f.svg)](https://github.com/facebook/jest)
 
-Client for sending user notifications within DfE Login
+Client for sending notifications within DfE Login
 
 ## Usage
 
 Create an instance of the NotificationClient, passing the connection string for the service
 
 ```
-const NotificatonClient = require('login.dfe.notifications.client');
+const { NotificatonClient } = require('login.dfe.jobs-client');
 const client = new NotificatonClient({
+  connectionString: '[CONNECTION-STRING-PROVIDED]'
+});
+```
+
+Create an instance of the PublicApiClient, passing the connection string for the service
+
+```
+const { PublicApiClient } = require('login.dfe.jobs-client');
+const client = new PublicApiClient({
+  connectionString: '[CONNECTION-STRING-PROVIDED]'
+});
+```
+
+Create an instance of the ServiceNotificationsClient, passing the connection string for the service
+
+```
+const { ServiceNotificationsClient } = require('login.dfe.jobs-client');
+const client = new ServiceNotificationsClient({
   connectionString: '[CONNECTION-STRING-PROVIDED]'
 });
 ```
@@ -46,19 +64,3 @@ await client.sendInvitation(email, firstName, lastName, serviceName, serviceName
 - `serviceName` name of the service they are invited to
 - `serviceNameWelcomeMessage` paragraph of email introducing to service they are invited to
 - `serviceNameWelcomeMessageDescription` paragraph of email giving a description of the service 
-
-## Running locally
-
-Install dependencies
-```
-npm i
-```
-
-Run relevant test script, for example:
-
-```
-node tools/sendPasswordReset.js
-node tools/sendInvitation.js
-```
-
-By default, the test scripts are configured to use your local machine. If you want to use them against another connection, edit ./tools/config.json

@@ -1,7 +1,7 @@
 {
   "name": "login.dfe.jobs-client",
   "version": "6.0.0",
-  "description": "Client for sending user notifications within DfE Login",
+  "description": "Client for sending notifications within DfE Login",
   "main": "lib/index.js",
   "scripts": {
     "test": "./node_modules/.bin/jest"
