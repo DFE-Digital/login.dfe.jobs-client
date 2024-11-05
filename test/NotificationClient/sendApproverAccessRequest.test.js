@@ -37,7 +37,7 @@ describe('when sending an approver access request email', () => {
     const kue = require('login.dfe.kue');
     kue.createQueue = createQueue;
 
-    const NotificationClient = require('./../lib');
+    const { NotificationClient } = require('../../lib');
     client = new NotificationClient({connectionString: connectionString, servicesUrl: servicesUrl});
   });
 

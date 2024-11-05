@@ -1,11 +1,10 @@
 jest.mock('login.dfe.kue');
 
 
-describe('when sending outstanding requests awaiting approval', () => {
+describe('when sending a user organisation request', () => {
 
   const connectionString = 'some-redis-connection';
-  const name = 'User One';
-  const requestsCount = 8;
+  const requestId = 'requestId';
 
   let invokeCallback;
   let jobSave;
@@ -35,41 +34,38 @@ describe('when sending outstanding requests awaiting approval', () => {
     const kue = require('login.dfe.kue');
     kue.createQueue = createQueue;
 
-    const NotificationClient = require('./../lib');
+    const { NotificationClient } = require('../../lib');
     client = new NotificationClient({connectionString: connectionString});
   });
 
   test('then it should create queue connecting to provided connection string', async () => {
-    await client.sendSupportOverdueRequest(name, requestsCount);
+    await client.sendUserOrganisationRequest(requestId);
 
     expect(createQueue.mock.calls.length).toBe(1);
     expect(createQueue.mock.calls[0][0].redis).toBe(connectionString);
   });
 
-  test('then it should create job with type of supportoverduerequest', async () => {
-    await client.sendSupportOverdueRequest(name, requestsCount);
+  test('then it should create job with type of organisationrequest_v1', async () => {
+    await client.sendUserOrganisationRequest(requestId);
 
     expect(create.mock.calls.length).toBe(1);
-    expect(create.mock.calls[0][0]).toBe('supportoverduerequest');
+    expect(create.mock.calls[0][0]).toBe('organisationrequest_v1');
   });
 
-  test('then it should create job with data in call', async () => {
-    await client.sendSupportOverdueRequest(name, requestsCount);
+  test('then it should create job with data including requestId', async () => {
+    await client.sendUserOrganisationRequest(requestId);
 
-    expect(create.mock.calls[0][1]).toEqual({
-      name,
-    requestsCount,
-    });
+    expect(create.mock.calls[0][1].requestId).toBe(requestId);
   });
 
   test('then it should save the job', async () => {
-    await client.sendSupportOverdueRequest(name, requestsCount);
+    await client.sendUserOrganisationRequest(requestId);
 
     expect(jobSave.mock.calls.length).toBe(1);
   });
 
   test('then it should resolve if there is no error', async () => {
-    await expect( client.sendSupportOverdueRequest(name, requestsCount)).resolves.toBeUndefined();
+    await expect(client.sendUserOrganisationRequest(requestId)).resolves.toBeUndefined();
   });
 
   test('then it should reject if there is an error', async () => {
@@ -77,7 +73,7 @@ describe('when sending outstanding requests awaiting approval', () => {
       callback('Unit test error');
     };
 
-    await expect( client.sendSupportOverdueRequest(name, requestsCount) ).rejects.toBeDefined();
+    await expect(client.sendUserOrganisationRequest(requestId)).rejects.toBeDefined();
   });
 
 });

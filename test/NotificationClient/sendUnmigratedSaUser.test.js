@@ -1,15 +1,13 @@
 jest.mock('login.dfe.kue');
 
-describe('when sending an service rejected email', () => {
+
+describe('when sending an unmigrated SA user email', () => {
 
   const connectionString = 'some-redis-connection';
   const email = 'user.one@unit.test';
   const firstName = 'User';
   const lastName = 'One';
-  const orgName = 'testOrg';
-  const serviceName = 'testServiceName';
-  const requestedSubServices = ["test-sub-service"];
-  const reason = "Not allowed";
+  const returnUrl = 'https://service.one.test/register/complete';
 
   let invokeCallback;
   let jobSave;
@@ -39,51 +37,51 @@ describe('when sending an service rejected email', () => {
     const kue = require('login.dfe.kue');
     kue.createQueue = createQueue;
 
-    const NotificationClient = require('../lib');
+    const { NotificationClient } = require('../../lib');
     client = new NotificationClient({connectionString: connectionString});
   });
 
   test('then it should create queue connecting to provided connection string', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+    await client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl);
 
     expect(createQueue.mock.calls.length).toBe(1);
     expect(createQueue.mock.calls[0][0].redis).toBe(connectionString);
   });
 
-  test('then it should create job with type of userservicerejected_v1', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+  test('then it should create job with type of unmigratedsauser_v1', async () => {
+    await client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl);
 
     expect(create.mock.calls.length).toBe(1);
-    expect(create.mock.calls[0][0]).toBe('userservicerejected_v1');
+    expect(create.mock.calls[0][0]).toBe('unmigratedsauser_v1');
   });
 
-
   test('then it should create job with data including email', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+    await client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl);
 
     expect(create.mock.calls[0][1].email).toBe(email);
   });
 
   test('then it should create job with data including firstName', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+    await client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl);
 
     expect(create.mock.calls[0][1].firstName).toBe(firstName);
   });
 
   test('then it should create job with data including lastName', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+    await client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl);
 
     expect(create.mock.calls[0][1].lastName).toBe(lastName);
   });
 
+
   test('then it should save the job', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+    await client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl);
 
     expect(jobSave.mock.calls.length).toBe(1);
   });
 
   test('then it should resolve if there is no error', async () => {
-    await client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason);
+    await expect(client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl)).resolves.toBeUndefined();
   });
 
   test('then it should reject if there is an error', async () => {
@@ -91,7 +89,7 @@ describe('when sending an service rejected email', () => {
       callback('Unit test error');
     };
 
-    await expect(client.sendServiceRequestRejected(email, firstName, lastName, orgName, serviceName, requestedSubServices, reason)).rejects.toBeDefined();
+    await expect(client.sendUnmigratedSaUser(email, firstName, lastName, returnUrl)).rejects.toBeDefined();
   });
 
 });
