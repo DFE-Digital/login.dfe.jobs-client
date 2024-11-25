@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/DFE-Digital/login.dfe.notifications.client#readme",
   "dependencies": {
-    "login.dfe.kue": "github:DFE-Digital/login.dfe.kue#v0.12.2"
+    "bullmq": "^5.29.0"
   },
   "devDependencies": {
     "eslint": "^8.12.0",
