@@ -1,6 +1,6 @@
 {
   "name": "login.dfe.jobs-client",
-  "version": "6.0.1",
+  "version": "6.1.0",
   "description": "Client for sending notifications within DfE Login",
   "main": "lib/index.js",
   "scripts": {
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/DFE-Digital/login.dfe.notifications.client#readme",
   "dependencies": {
-    "login.dfe.kue": "github:DFE-Digital/login.dfe.kue#v0.12.2"
+    "bullmq": "^5.29.0"
   },
   "devDependencies": {
     "eslint": "^8.12.0",

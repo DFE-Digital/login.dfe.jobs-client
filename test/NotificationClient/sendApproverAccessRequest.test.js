@@ -1,4 +1,15 @@
-jest.mock('login.dfe.kue');
+jest.mock('bullmq', () => {
+  return {
+    Queue: jest.fn().mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn(),
+      };
+    })
+  };
+});
+
+const { Queue } = require('bullmq');
 
 
 describe('when sending an approver access request email', () => {
@@ -9,34 +20,9 @@ describe('when sending an approver access request email', () => {
   const orgName = 'My Org';
   const recipients = ['test1@unit.com','test1@unit.com'];
 
-  let invokeCallback;
-  let jobSave;
-  let create;
-  let createQueue;
   let client;
 
   beforeEach(() => {
-    invokeCallback = (callback) => {
-      callback();
-    };
-
-    jobSave = jest.fn().mockImplementation((callback) => {
-      invokeCallback(callback);
-    });
-
-    create = jest.fn().mockImplementation(() => {
-      return {
-        save: jobSave
-      };
-    });
-
-    createQueue = jest.fn().mockReturnValue({
-      create
-    });
-
-    const kue = require('login.dfe.kue');
-    kue.createQueue = createQueue;
-
     const { NotificationClient } = require('../../lib');
     client = new NotificationClient({connectionString: connectionString, servicesUrl: servicesUrl});
   });
@@ -44,39 +30,53 @@ describe('when sending an approver access request email', () => {
   test('then it should create queue connecting to provided connection string', async () => {
     await client.sendApproverAccessRequest(name, orgName, recipients);
 
-    expect(createQueue.mock.calls.length).toBe(1);
-    expect(createQueue.mock.calls[0][0].redis).toBe(connectionString);
+    expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
   });
 
   test('then it should create job with type of approveraccessrequest_v1', async () => {
     await client.sendApproverAccessRequest(name, orgName, recipients);
 
-    expect(create.mock.calls.length).toBe(1);
-    expect(create.mock.calls[0][0]).toBe('approveraccessrequest_v1');
+    expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][0]).toBe('approveraccessrequest_v1');
   });
 
   test('then it should create job with data including name', async () => {
     await client.sendApproverAccessRequest(name, orgName, recipients);
 
-    expect(create.mock.calls[0][1].name).toBe(name);
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledWith('approveraccessrequest_v1', {
+      name: 'Test Tester',
+      orgName: 'My Org',
+      recipients: ['test1@unit.com', 'test1@unit.com'],
+    },
+    { 
+      removeOnComplete: {
+        age: 3600, 
+        count: 50
+      },
+      removeOnFail: {
+        age: 43200
+      },
+    });
   });
 
   test('then it should create job with data including org name', async () => {
     await client.sendApproverAccessRequest(name, orgName, recipients);
 
-    expect(create.mock.calls[0][1].orgName).toBe(orgName);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(orgName);
   });
 
   test('then it should create job with data including recipients', async () => {
     await client.sendApproverAccessRequest(name, orgName, recipients);
 
-    expect(create.mock.calls[0][1].recipients).toBe(recipients);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].recipients).toBe(recipients);
   });
 
   test('then it should save the job', async () => {
     await client.sendApproverAccessRequest(name, orgName, recipients);
 
-    expect(jobSave.mock.calls.length).toBe(1);
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
   test('then it should resolve if there is no error', async () => {
@@ -84,11 +84,17 @@ describe('when sending an approver access request email', () => {
   });
 
   test('then it should reject if there is an error', async () => {
-    invokeCallback = (callback) => {
-      callback('Unit test error');
-    };
+    Queue.mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn().mockImplementation(() => {
+          throw new Error('bad times');
+        })
+      };
+    })
 
-    await expect(client.sendApproverAccessRequest(name, orgName, recipients)).rejects.toBeDefined();
+    await expect(client.sendAccessRequest(name, orgName, recipients)).rejects.toBeDefined();
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
 });

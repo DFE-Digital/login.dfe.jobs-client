@@ -1,4 +1,15 @@
-jest.mock('login.dfe.kue');
+jest.mock('bullmq', () => {
+  return {
+    Queue: jest.fn().mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn(),
+      };
+    })
+  };
+});
+
+const { Queue } = require('bullmq');
 
 describe('when sending an service approved email', () => {
 
@@ -14,34 +25,9 @@ describe('when sending an service approved email', () => {
     name: "End user",
   };
 
-  let invokeCallback;
-  let jobSave;
-  let create;
-  let createQueue;
   let client;
 
   beforeEach(() => {
-    invokeCallback = (callback) => {
-      callback();
-    };
-
-    jobSave = jest.fn().mockImplementation((callback) => {
-      invokeCallback(callback);
-    });
-
-    create = jest.fn().mockImplementation(() => {
-      return {
-        save: jobSave
-      };
-    });
-
-    createQueue = jest.fn().mockReturnValue({
-      create
-    });
-
-    const kue = require('login.dfe.kue');
-    kue.createQueue = createQueue;
-
     const { NotificationClient } = require('../../lib');
     client = new NotificationClient({connectionString: connectionString});
   });
@@ -49,58 +35,61 @@ describe('when sending an service approved email', () => {
   test('then it should create queue connecting to provided connection string', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(createQueue.mock.calls.length).toBe(1);
-    expect(createQueue.mock.calls[0][0].redis).toBe(connectionString);
+    expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
   });
 
   test('then it should create job with type of userserviceadded_v2', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(create.mock.calls.length).toBe(1);
-    expect(create.mock.calls[0][0]).toBe('userserviceadded_v2');
+    expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][0]).toBe('userserviceadded_v2');
   });
 
 
   test('then it should create job with data including email', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(create.mock.calls[0][1].email).toBe(email);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
   });
 
   test('then it should create job with data including firstName', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(create.mock.calls[0][1].firstName).toBe(firstName);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(firstName);
   });
 
   test('then it should create job with data including lastName', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(create.mock.calls[0][1].lastName).toBe(lastName);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(lastName);
   });
 
   test('then it should create job with data including permission', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(create.mock.calls[0][1].permission).toBe(permission);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].permission).toBe(permission);
   });
 
   test('then it should save the job', async () => {
     await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
 
-    expect(jobSave.mock.calls.length).toBe(1);
-  });
-
-  test('then it should resolve if there is no error', async () => {
-    await client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission);
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
   test('then it should reject if there is an error', async () => {
-    invokeCallback = (callback) => {
-      callback('Unit test error');
-    };
+    Queue.mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn().mockImplementation(() => {
+          throw new Error('bad times');
+        })
+      };
+    })
 
     await expect(client.sendServiceRequestApproved(email, firstName, lastName, orgName, serviceName, requestedSubServices, permission)).rejects.toBeDefined();
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
 });

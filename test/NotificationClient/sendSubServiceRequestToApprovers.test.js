@@ -1,4 +1,15 @@
-jest.mock('login.dfe.kue');
+jest.mock('bullmq', () => {
+	return {
+  Queue: jest.fn().mockImplementation(() => {
+  return {
+    add: jest.fn(),
+    close: jest.fn(),
+  };
+  })
+};
+});
+
+const { Queue } = require('bullmq');
 
 describe('when sending a sub-service request email', () => {
 	const connectionString = 'some-redis-connection';
@@ -16,34 +27,9 @@ describe('when sending a sub-service request email', () => {
 		JSON.stringify(requestedSubServices))}/approve-roles-request?reqId=new-uuid`;
 	const helpUrl = 'https://localhost:3001/help/requests/can-end-user-request-service';
 
-	let invokeCallback;
-	let jobSave;
-	let create;
-	let createQueue;
 	let client;
 
 	beforeEach(() => {
-		invokeCallback = (callback) => {
-			callback();
-		};
-
-		jobSave = jest.fn().mockImplementation((callback) => {
-			invokeCallback(callback);
-		});
-
-		create = jest.fn().mockImplementation(() => {
-			return {
-				save: jobSave,
-			};
-		});
-
-		createQueue = jest.fn().mockReturnValue({
-			create,
-		});
-
-		const kue = require('login.dfe.kue');
-		kue.createQueue = createQueue;
-
 		const { NotificationClient } = require('../../lib');
 		client = new NotificationClient({ connectionString: connectionString });
 	});
@@ -62,8 +48,8 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(createQueue.mock.calls.length).toBe(1);
-		expect(createQueue.mock.calls[0][0].redis).toBe(connectionString);
+		expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
 	});
 
 	it('then it should create job with type of sub_service_request_to_approvers', async () => {
@@ -80,8 +66,8 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls.length).toBe(1);
-		expect(create.mock.calls[0][0]).toBe('sub_service_request_to_approvers');
+		expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][0]).toBe('sub_service_request_to_approvers');
 	});
 
 	it('then it should create job with data including sender`s first name', async () => {
@@ -98,7 +84,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].senderFirstName).toBe(senderFirstName);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].senderFirstName).toBe(senderFirstName);
 	});
 
 	it('then it should create job with data including sender`s lastName', async () => {
@@ -115,7 +101,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].senderLastName).toBe(senderLastName);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].senderLastName).toBe(senderLastName);
 	});
 
 	it('then it should create job with data including sender Email address', async () => {
@@ -132,7 +118,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].senderEmail).toBe(senderEmail);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].senderEmail).toBe(senderEmail);
 	});
 
 	it('then it should create job with data including organisation id', async () => {
@@ -149,7 +135,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].orgId).toBe(orgId);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgId).toBe(orgId);
 	});
 
 	it('then it should create job with data including organisation name', async () => {
@@ -166,7 +152,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].orgName).toBe(orgName);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(orgName);
 	});
 
 	it('then it should create job with data including service name', async () => {
@@ -183,7 +169,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].serviceName).toBe(serviceName);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].serviceName).toBe(serviceName);
 	});
 
 	it('then it should create job with data including requested sub services names', async () => {
@@ -200,7 +186,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].requestedSubServices).toBe(
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].requestedSubServices).toBe(
 			requestedSubServices
 		);
 	});
@@ -219,7 +205,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].rejectUrl).toBe(rejectUrl);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].rejectUrl).toBe(rejectUrl);
 	});
 
 	it('then it should create job with data including the url for approving the request', async () => {
@@ -236,7 +222,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].approveUrl).toBe(approveUrl);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].approveUrl).toBe(approveUrl);
 	});
 
 	it('then it should create job with data including the url for help pages', async () => {
@@ -253,7 +239,7 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(create.mock.calls[0][1].helpUrl).toBe(helpUrl);
+		expect(Queue.mock.results[0].value.add.mock.calls[0][1].helpUrl).toBe(helpUrl);
 	});
 
 	it('then it should save the job', async () => {
@@ -270,28 +256,19 @@ describe('when sending a sub-service request email', () => {
 			helpUrl
 		);
 
-		expect(jobSave.mock.calls.length).toBe(1);
-	});
-
-	it('then it should resolve if there is no error', async () => {
-		await client.sendSubServiceRequestToApprovers(
-			senderFirstName,
-			senderLastName,
-			senderEmail,
-			orgId,
-			orgName,
-			serviceName,
-			requestedSubServices,
-			rejectUrl,
-			approveUrl,
-			helpUrl
-		);
+		expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
+		expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
 	});
 
 	it('then it should reject if there is an error', async () => {
-		invokeCallback = (callback) => {
-			callback('Unit test error');
-		};
+		Queue.mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn().mockImplementation(() => {
+          throw new Error('bad times');
+        })
+      };
+    })
 
 		await expect(
 			client.sendSubServiceRequestToApprovers(
@@ -307,5 +284,6 @@ describe('when sending a sub-service request email', () => {
 				helpUrl
 			)
 		).rejects.toBeDefined();
+		expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
 	});
 });
