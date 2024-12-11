@@ -1,14 +1,17 @@
-jest.mock('login.dfe.kue');
+jest.mock('bullmq', () => {
+  return {
+    Queue: jest.fn().mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn(),
+      };
+    })
+  };
+});
 
-const kue = require('login.dfe.kue');
+const { Queue } = require('bullmq');
 const { PublicApiClient } = require('../../lib');
 
-const job = {
-  save: jest.fn(),
-};
-const queue = {
-  create: jest.fn(),
-};
 const connectionString = 'some-redis-connection-string';
 const userId = 'user-1';
 const callbacks = [
@@ -19,38 +22,30 @@ describe('when sending publicinvitationcomplete_v1', () => {
   let client;
 
   beforeEach(() => {
-    job.save.mockReset().mockImplementation((cb) => {
-      cb();
-    });
-
-    queue.create.mockReset().mockReturnValue(job);
-
-    kue.createQueue.mockReset().mockReturnValue(queue);
-
     client = new PublicApiClient({ connectionString });
   });
 
   it('then it should create new queue connection to redis', async () => {
     await client.sendInvitationComplete(userId, callbacks);
 
-    expect(kue.createQueue).toHaveBeenCalledTimes(1);
-    expect(kue.createQueue.mock.calls[0][0]).toEqual({
-      redis: connectionString,
-    });
+    expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
   });
 
   it('then it should create job with correct type', async () => {
     await client.sendInvitationComplete(userId, callbacks);
 
-    expect(queue.create).toHaveBeenCalledTimes(1);
-    expect(queue.create.mock.calls[0][0]).toBe('publicinvitationcomplete_v1');
+    expect(Queue.mock.calls.length).toBe(1);
+    expect(Queue.mock.calls[0][0]).toBe('publicinvitationcomplete_v1');
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
   it('then it should create job with correct data', async () => {
     await client.sendInvitationComplete(userId, callbacks);
 
-    expect(queue.create).toHaveBeenCalledTimes(1);
-    expect(queue.create.mock.calls[0][1]).toEqual({
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1]).toEqual({
       userId,
       callbacks,
     });
@@ -59,20 +54,21 @@ describe('when sending publicinvitationcomplete_v1', () => {
   it('then it should save job', async () => {
     await client.sendInvitationComplete(userId, callbacks);
 
-    expect(job.save).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
   it('then it should error if fails to save job', async () => {
-    job.save.mockImplementation(() => {
-      throw new Error('test');
+    Queue.mockImplementation(() => {
+      return {
+        add: jest.fn(),
+        close: jest.fn().mockImplementation(() => {
+          throw new Error('bad times');
+        })
+      };
     });
-
-    try {
-      await client.sendInvitationComplete(userId, callbacks);
-      throw new Error('no error thrown');
-    } catch (e) {
-      expect(e.message).toBe('test');
-      expect(job.save).toHaveBeenCalledTimes(1);
-    }
+    
+    await expect(client.sendInvitationComplete(userId, callbacks)).rejects.toBeDefined();
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 });
