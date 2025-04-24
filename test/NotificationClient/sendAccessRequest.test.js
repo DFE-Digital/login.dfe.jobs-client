@@ -18,6 +18,7 @@ describe("when sending an access request email", () => {
   const orgName = "My Org";
   const approved = true;
   const reason = "reason";
+  const intentionalError = "ESLINT ERROR";
 
   let client;
 
