@@ -60,3 +60,4 @@ typings/
 #dev env
 .idea
 .DS_Store
+eslint-results.xml
