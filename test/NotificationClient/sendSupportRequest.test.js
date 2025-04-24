@@ -76,7 +76,6 @@ describe("when sending a support request", () => {
       name,
       email,
       service,
-      service,
       type,
       typeAdditionalInfo: null,
       orgName,
