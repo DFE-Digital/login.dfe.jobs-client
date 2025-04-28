@@ -1,51 +1,78 @@
-jest.mock('bullmq', () => {
+jest.mock("bullmq", () => {
   return {
     Queue: jest.fn().mockImplementation(() => {
       return {
         add: jest.fn(),
         close: jest.fn(),
       };
-    })
+    }),
   };
 });
 
-const { Queue } = require('bullmq');
-const { PublicApiClient } = require('../../lib');
+const { Queue } = require("bullmq");
+const { PublicApiClient } = require("../../lib");
 
-const connectionString = 'some-redis-connection-string';
-const firstName = 'User';
-const lastName = 'One';
-const email = 'user.one@unit.test';
-const organisation = 'org-1';
-const sourceId = 'first-user';
-const callback = 'http://relying.party/cb';
-const userRedirect = 'http://relying.party/login';
-const clientId = 'client-1';
+const connectionString = "some-redis-connection-string";
+const firstName = "User";
+const lastName = "One";
+const email = "user.one@unit.test";
+const organisation = "org-1";
+const sourceId = "first-user";
+const callback = "http://relying.party/cb";
+const userRedirect = "http://relying.party/login";
+const clientId = "client-1";
 
-describe('when sending publicinvitationrequest_v1', () => {
+describe("when sending publicinvitationrequest_v1", () => {
   let client;
 
   beforeEach(() => {
     client = new PublicApiClient({ connectionString });
   });
 
-  it('then it should create new queue connection to redis', async () => {
-    await client.sendInvitationRequest(firstName, lastName, email, organisation, sourceId, callback, userRedirect, clientId);
+  it("then it should create new queue connection to redis", async () => {
+    await client.sendInvitationRequest(
+      firstName,
+      lastName,
+      email,
+      organisation,
+      sourceId,
+      callback,
+      userRedirect,
+      clientId,
+    );
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
   });
 
-  it('then it should create job with correct type', async () => {
-    await client.sendInvitationRequest(firstName, lastName, email, organisation, sourceId, callback, userRedirect, clientId);
+  it("then it should create job with correct type", async () => {
+    await client.sendInvitationRequest(
+      firstName,
+      lastName,
+      email,
+      organisation,
+      sourceId,
+      callback,
+      userRedirect,
+      clientId,
+    );
 
     expect(Queue.mock.calls.length).toBe(1);
-    expect(Queue.mock.calls[0][0]).toBe('publicinvitationrequest_v1');
+    expect(Queue.mock.calls[0][0]).toBe("publicinvitationrequest_v1");
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
-  it('then it should create job with correct data', async () => {
-    await client.sendInvitationRequest(firstName, lastName, email, organisation, sourceId, callback, userRedirect, clientId);
+  it("then it should create job with correct data", async () => {
+    await client.sendInvitationRequest(
+      firstName,
+      lastName,
+      email,
+      organisation,
+      sourceId,
+      callback,
+      userRedirect,
+      clientId,
+    );
 
     expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
@@ -61,24 +88,44 @@ describe('when sending publicinvitationrequest_v1', () => {
     });
   });
 
-  it('then it should save job', async () => {
-    await client.sendInvitationRequest(firstName, lastName, email, organisation, sourceId, callback, userRedirect, clientId);
+  it("then it should save job", async () => {
+    await client.sendInvitationRequest(
+      firstName,
+      lastName,
+      email,
+      organisation,
+      sourceId,
+      callback,
+      userRedirect,
+      clientId,
+    );
 
     expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 
-  it('then it should error if fails to save job', async () => {
+  it("then it should error if fails to save job", async () => {
     Queue.mockImplementation(() => {
       return {
         add: jest.fn(),
         close: jest.fn().mockImplementation(() => {
-          throw new Error('bad times');
-        })
+          throw new Error("bad times");
+        }),
       };
     });
 
-    await expect(client.sendInvitationRequest(firstName, lastName, email, organisation, sourceId, callback, userRedirect, clientId)).rejects.toBeDefined();
+    await expect(
+      client.sendInvitationRequest(
+        firstName,
+        lastName,
+        email,
+        organisation,
+        sourceId,
+        callback,
+        userRedirect,
+        clientId,
+      ),
+    ).rejects.toBeDefined();
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 });

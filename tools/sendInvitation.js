@@ -1,10 +1,19 @@
-const utils = require('./utils');
+const utils = require("./utils");
 
-utils.getClient()
+utils
+  .getClient()
   .then((client) => {
-    client.sendInvitation('some.user@test.local', 'Test', 'User', 'New service', '12345', '654321')
+    client
+      .sendInvitation(
+        "some.user@test.local",
+        "Test",
+        "User",
+        "New service",
+        "12345",
+        "654321",
+      )
       .then(() => {
-        console.info('Sent');
+        console.info("Sent");
       })
       .catch((err) => {
         console.error(`Error sending - ${err}`);

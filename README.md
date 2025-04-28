@@ -54,13 +54,13 @@ await client.sendPasswordReset(email, code, clientId);
 Send an invitation to a user about a service
 
 ```
-await client.sendInvitation(email, firstName, lastName, serviceName, serviceNameWelcomeMessage, 
+await client.sendInvitation(email, firstName, lastName, serviceName, serviceNameWelcomeMessage,
         serviceNameWelcomeMessageDescription);
 ```
 
 - `email` the email address of the user receiving the notification
-- `firstName` first name of the recipient 
+- `firstName` first name of the recipient
 - `lastName` last name of the recipient
 - `serviceName` name of the service they are invited to
 - `serviceNameWelcomeMessage` paragraph of email introducing to service they are invited to
-- `serviceNameWelcomeMessageDescription` paragraph of email giving a description of the service 
+- `serviceNameWelcomeMessageDescription` paragraph of email giving a description of the service

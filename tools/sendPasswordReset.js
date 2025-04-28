@@ -1,10 +1,12 @@
-const utils = require('./utils');
+const utils = require("./utils");
 
-utils.getClient()
+utils
+  .getClient()
   .then((client) => {
-    client.sendPasswordReset('some.user@test.local', 'A1B2C3D4', 'foo4')
+    client
+      .sendPasswordReset("some.user@test.local", "A1B2C3D4", "foo4")
       .then(() => {
-        console.info('Sent');
+        console.info("Sent");
       })
       .catch((err) => {
         console.error(`Error sending - ${err}`);
