@@ -13,6 +13,8 @@ const { Queue } = require("bullmq");
 
 describe("when sending an organisation request outcome to approvers email", () => {
   const connectionString = "some-redis-connection";
+  const organisationId = "org-1";
+  const approverUserId = "approver-1";
   const email = "user.one@unit.test";
   const name = "Test Tester";
   const orgName = "My Org";
@@ -45,6 +47,8 @@ describe("when sending an organisation request outcome to approvers email", () =
 
   test("then it should create job with data including email", async () => {
     await client.sendOrganisationRequestOutcomeToApprovers(
+      organisationId,
+      approverUserId,
       email,
       name,
       orgName,
@@ -55,6 +59,8 @@ describe("when sending an organisation request outcome to approvers email", () =
     expect(Queue.mock.results[0].value.add).toHaveBeenCalledWith(
       "organisation_request_outcome_to_approvers",
       {
+        organisationId: "org-1",
+        approverUserId: "approver-1",
         approved: true,
         email: "user.one@unit.test",
         name: "Test Tester",
@@ -75,6 +81,8 @@ describe("when sending an organisation request outcome to approvers email", () =
 
   test("then it should save the job", async () => {
     await client.sendOrganisationRequestOutcomeToApprovers(
+      organisationId,
+      approverUserId,
       email,
       name,
       orgName,
@@ -89,6 +97,8 @@ describe("when sending an organisation request outcome to approvers email", () =
   test("then it should resolve if there is no error", async () => {
     await expect(
       client.sendOrganisationRequestOutcomeToApprovers(
+        organisationId,
+        approverUserId,
         email,
         name,
         orgName,
@@ -110,6 +120,8 @@ describe("when sending an organisation request outcome to approvers email", () =
 
     await expect(
       client.sendOrganisationRequestOutcomeToApprovers(
+        organisationId,
+        approverUserId,
         email,
         name,
         orgName,
