@@ -30,6 +30,8 @@ describe("when sending an organisation request outcome to approvers email", () =
 
   test("then it should create queue connecting to provided connection string and template", async () => {
     await client.sendOrganisationRequestOutcomeToApprovers(
+      organisationId,
+      approverUserId,
       email,
       name,
       orgName,
