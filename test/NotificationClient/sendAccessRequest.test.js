@@ -26,16 +26,11 @@ describe("when sending an access request email", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and template", async () => {
     await client.sendAccessRequest(email, name, orgName, approved, reason);
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of accessrequest_v1", async () => {
-    await client.sendAccessRequest(email, name, orgName, approved, reason);
-
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("accessrequest_v1");
   });
@@ -61,36 +56,6 @@ describe("when sending an access request email", () => {
           age: 43200,
         },
       },
-    );
-  });
-
-  test("then it should create job with data including name", async () => {
-    await client.sendAccessRequest(email, name, orgName, approved, reason);
-
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].name).toBe(name);
-  });
-
-  test("then it should create job with data including org name", async () => {
-    await client.sendAccessRequest(email, name, orgName, approved, reason);
-
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
-      orgName,
-    );
-  });
-
-  test("then it should create job with data including approved", async () => {
-    await client.sendAccessRequest(email, name, orgName, approved, reason);
-
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].approved).toBe(
-      approved,
-    );
-  });
-
-  test("then it should create job with data including reason", async () => {
-    await client.sendAccessRequest(email, name, orgName, approved, reason);
-
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].reason).toBe(
-      reason,
     );
   });
 
@@ -120,6 +85,29 @@ describe("when sending an access request email", () => {
     await expect(
       client.sendAccessRequest(email, name, orgName, approved, reason),
     ).rejects.toBeDefined();
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
+  });
+
+  test("then it should raise an exception if the add function errors", async () => {
+    Queue.mockImplementation(() => {
+      return {
+        add: jest.fn().mockImplementation(() => {
+          throw new Error("bad times adding");
+        }),
+        close: jest.fn(),
+      };
+    });
+
+    expect.assertions(3);
+    client
+      .sendAccessRequest(email, name, orgName, approved, reason)
+      .catch((error) =>
+        expect(error.message).toBe(
+          "NotificationClient: Error while adding message to redis queue - {}",
+        ),
+      );
+
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
 });

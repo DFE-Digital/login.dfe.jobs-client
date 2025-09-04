@@ -11,18 +11,13 @@ jest.mock("bullmq", () => {
 
 const { Queue } = require("bullmq");
 
-describe("when sending an service approved email", () => {
+describe("when sending an organisation request outcome to approvers email", () => {
   const connectionString = "some-redis-connection";
   const email = "user.one@unit.test";
-  const firstName = "User";
-  const lastName = "One";
-  const orgName = "testOrg";
-  const serviceName = "testServiceName";
-  const requestedSubServices = ["test-sub-service"];
-  const permission = {
-    id: 0,
-    name: "End user",
-  };
+  const name = "Test Tester";
+  const orgName = "My Org";
+  const approved = true;
+  const reason = "reason";
 
   let client;
 
@@ -32,58 +27,75 @@ describe("when sending an service approved email", () => {
   });
 
   test("then it should create queue connecting to provided connection string and template", async () => {
-    await client.sendServiceRequestApproved(
+    await client.sendOrganisationRequestOutcomeToApprovers(
       email,
-      firstName,
-      lastName,
+      name,
       orgName,
-      serviceName,
-      requestedSubServices,
-      permission,
+      approved,
+      reason,
     );
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
     expect(Queue.mock.calls.length).toBe(1);
-    expect(Queue.mock.calls[0][0]).toBe("userserviceadded_v2");
+    expect(Queue.mock.calls[0][0]).toBe(
+      "organisation_request_outcome_to_approvers",
+    );
   });
 
-  test("then it should create job with expected data", async () => {
-    await client.sendServiceRequestApproved(
+  test("then it should create job with data including email", async () => {
+    await client.sendOrganisationRequestOutcomeToApprovers(
       email,
-      firstName,
-      lastName,
+      name,
       orgName,
-      serviceName,
-      requestedSubServices,
-      permission,
+      approved,
+      reason,
     );
 
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
-      firstName,
-    );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
-      lastName,
-    );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].permission).toBe(
-      permission,
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledWith(
+      "organisation_request_outcome_to_approvers",
+      {
+        approved: true,
+        email: "user.one@unit.test",
+        name: "Test Tester",
+        orgName: "My Org",
+        reason: "reason",
+      },
+      {
+        removeOnComplete: {
+          age: 3600,
+          count: 50,
+        },
+        removeOnFail: {
+          age: 43200,
+        },
+      },
     );
   });
 
   test("then it should save the job", async () => {
-    await client.sendServiceRequestApproved(
+    await client.sendOrganisationRequestOutcomeToApprovers(
       email,
-      firstName,
-      lastName,
+      name,
       orgName,
-      serviceName,
-      requestedSubServices,
-      permission,
+      approved,
+      reason,
     );
 
     expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
+  });
+
+  test("then it should resolve if there is no error", async () => {
+    await expect(
+      client.sendOrganisationRequestOutcomeToApprovers(
+        email,
+        name,
+        orgName,
+        approved,
+        reason,
+      ),
+    ).resolves.toBeUndefined();
   });
 
   test("then it should reject if there is an error", async () => {
@@ -97,14 +109,12 @@ describe("when sending an service approved email", () => {
     });
 
     await expect(
-      client.sendServiceRequestApproved(
+      client.sendOrganisationRequestOutcomeToApprovers(
         email,
-        firstName,
-        lastName,
+        name,
         orgName,
-        serviceName,
-        requestedSubServices,
-        permission,
+        approved,
+        reason,
       ),
     ).rejects.toBeDefined();
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);

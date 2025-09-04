@@ -27,7 +27,7 @@ describe("when sending an sub service request approval email", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and template", async () => {
     await client.sendSubServiceRequestApproved(
       email,
       firstName,
@@ -39,23 +39,11 @@ describe("when sending an sub service request approval email", () => {
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of sub_service_request_approved", async () => {
-    await client.sendSubServiceRequestApproved(
-      email,
-      firstName,
-      lastName,
-      orgName,
-      serviceName,
-      requestedSubServices,
-    );
-
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("sub_service_request_approved");
   });
 
-  test("then it should create job with data including email", async () => {
+  test("then it should create job with expected data", async () => {
     await client.sendSubServiceRequestApproved(
       email,
       firstName,
@@ -66,78 +54,18 @@ describe("when sending an sub service request approval email", () => {
     );
 
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-  });
-
-  test("then it should create job with data including first name", async () => {
-    await client.sendSubServiceRequestApproved(
-      email,
-      firstName,
-      lastName,
-      orgName,
-      serviceName,
-      requestedSubServices,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
     );
-  });
-
-  test("then it should create job with data including last name", async () => {
-    await client.sendSubServiceRequestApproved(
-      email,
-      firstName,
-      lastName,
-      orgName,
-      serviceName,
-      requestedSubServices,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );
-  });
-
-  test("then it should create job with data including organisation name", async () => {
-    await client.sendSubServiceRequestApproved(
-      email,
-      firstName,
-      lastName,
-      orgName,
-      serviceName,
-      requestedSubServices,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
       orgName,
     );
-  });
-
-  test("then it should create job with data including service name", async () => {
-    await client.sendSubServiceRequestApproved(
-      email,
-      firstName,
-      lastName,
-      orgName,
-      serviceName,
-      requestedSubServices,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].serviceName).toBe(
       serviceName,
     );
-  });
-
-  test("then it should create job with data including requested sub-services", async () => {
-    await client.sendSubServiceRequestApproved(
-      email,
-      firstName,
-      lastName,
-      orgName,
-      serviceName,
-      requestedSubServices,
-    );
-
     expect(
       Queue.mock.results[0].value.add.mock.calls[0][1].requestedSubServices,
     ).toBe(requestedSubServices);

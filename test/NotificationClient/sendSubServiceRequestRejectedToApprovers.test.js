@@ -11,7 +11,7 @@ jest.mock("bullmq", () => {
 
 const { Queue } = require("bullmq");
 
-describe("when sending an sub service request rejected email", () => {
+describe("when sending an sub service request rejected to approvers email", () => {
   const connectionString = "some-redis-connection";
   const email = "jane.doe@unit.test";
   const firstName = "Jane";
@@ -29,7 +29,7 @@ describe("when sending an sub service request rejected email", () => {
   });
 
   test("then it should create queue connecting to provided connection string and template", async () => {
-    await client.sendSubServiceRequestRejected(
+    await client.sendSubServiceRequestRejectedToApprovers(
       email,
       firstName,
       lastName,
@@ -42,11 +42,13 @@ describe("when sending an sub service request rejected email", () => {
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
     expect(Queue.mock.calls.length).toBe(1);
-    expect(Queue.mock.calls[0][0]).toBe("sub_service_request_rejected");
+    expect(Queue.mock.calls[0][0]).toBe(
+      "sub_service_request_rejected_to_approvers",
+    );
   });
 
   test("then it should create job with expected data", async () => {
-    await client.sendSubServiceRequestRejected(
+    await client.sendSubServiceRequestRejectedToApprovers(
       email,
       firstName,
       lastName,
@@ -78,7 +80,7 @@ describe("when sending an sub service request rejected email", () => {
   });
 
   test("then it should save the job", async () => {
-    await client.sendSubServiceRequestRejected(
+    await client.sendSubServiceRequestRejectedToApprovers(
       email,
       firstName,
       lastName,
@@ -103,7 +105,7 @@ describe("when sending an sub service request rejected email", () => {
     });
 
     await expect(
-      client.sendSubServiceRequestRejected(
+      client.sendSubServiceRequestRejectedToApprovers(
         email,
         firstName,
         lastName,
