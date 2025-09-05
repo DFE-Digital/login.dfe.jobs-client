@@ -27,7 +27,7 @@ describe("when sending a password reset", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and correct type", async () => {
     await client.sendPasswordReset(
       email,
       firstName,
@@ -39,23 +39,10 @@ describe("when sending a password reset", () => {
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of passwordreset_v1", async () => {
-    await client.sendPasswordReset(
-      email,
-      firstName,
-      lastName,
-      code,
-      clientId,
-      uid,
-    );
-
-    expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("passwordreset_v1");
   });
 
-  test("then it should create job with data including email", async () => {
+  test("then it should create job with expected data", async () => {
     await client.sendPasswordReset(
       email,
       firstName,
@@ -66,74 +53,16 @@ describe("when sending a password reset", () => {
     );
 
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-  });
-
-  test("then it should create job with data including first name", async () => {
-    await client.sendPasswordReset(
-      email,
-      firstName,
-      lastName,
-      code,
-      clientId,
-      uid,
-    );
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
-    );
-  });
-
-  test("then it should create job with data including last name", async () => {
-    await client.sendPasswordReset(
-      email,
-      firstName,
-      lastName,
-      code,
-      clientId,
-      uid,
     );
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );
-  });
-
-  test("then it should create job with data including code", async () => {
-    await client.sendPasswordReset(
-      email,
-      firstName,
-      lastName,
-      code,
-      clientId,
-      uid,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].code).toBe(code);
-  });
-
-  test("then it should create job with data including clientId", async () => {
-    await client.sendPasswordReset(
-      email,
-      firstName,
-      lastName,
-      code,
-      clientId,
-      uid,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].clientId).toBe(
       clientId,
     );
-  });
-
-  test("then it should create job with data including uid", async () => {
-    await client.sendPasswordReset(
-      email,
-      firstName,
-      lastName,
-      code,
-      clientId,
-      uid,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].uid).toBe(uid);
   });
 

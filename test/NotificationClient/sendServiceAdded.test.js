@@ -24,37 +24,21 @@ describe("when sending an service added email", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and correct type", async () => {
     await client.sendServiceAdded(email, firstName, lastName);
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of userserviceadded_v1", async () => {
-    await client.sendServiceAdded(email, firstName, lastName);
-
-    expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("userserviceadded_v1");
   });
 
-  test("then it should create job with data including email", async () => {
+  test("then it should create job with expected data", async () => {
     await client.sendServiceAdded(email, firstName, lastName);
 
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-  });
-
-  test("then it should create job with data including firstName", async () => {
-    await client.sendServiceAdded(email, firstName, lastName);
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
     );
-  });
-
-  test("then it should create job with data including lastName", async () => {
-    await client.sendServiceAdded(email, firstName, lastName);
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );

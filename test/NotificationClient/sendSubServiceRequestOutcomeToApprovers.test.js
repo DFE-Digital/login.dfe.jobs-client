@@ -15,8 +15,8 @@ describe("when sending an sub service request outcome to approvers email", () =>
   const connectionString = "some-redis-connection";
   const organisationId = "org-1";
   const approverUserId = "approver-1";
-  const email = "jane.doe@unit.test";
-  const name = "Jane Doe";
+  const endUserName = "Jane Doe";
+  const endUserEmail = "jane.doe@unit.test";
   const orgName = "Test Organisation";
   const serviceName = "Test ServiceName";
   const requestedSubServices = ["test-sub-service"];
@@ -34,8 +34,8 @@ describe("when sending an sub service request outcome to approvers email", () =>
     await client.sendSubServiceRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      email,
-      name,
+      endUserName,
+      endUserEmail,
       orgName,
       serviceName,
       requestedSubServices,
@@ -49,15 +49,14 @@ describe("when sending an sub service request outcome to approvers email", () =>
     expect(Queue.mock.calls[0][0]).toBe(
       "sub_service_request_outcome_to_approvers",
     );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
   });
 
   test("then it should create job with expected data", async () => {
     await client.sendSubServiceRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      email,
-      name,
+      endUserName,
+      endUserEmail,
       orgName,
       serviceName,
       requestedSubServices,
@@ -71,8 +70,12 @@ describe("when sending an sub service request outcome to approvers email", () =>
     expect(
       Queue.mock.results[0].value.add.mock.calls[0][1].approverUserId,
     ).toBe(approverUserId);
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].name).toBe(name);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
+      endUserName,
+    );
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserEmail).toBe(
+      endUserEmail,
+    );
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
       orgName,
     );
@@ -94,8 +97,8 @@ describe("when sending an sub service request outcome to approvers email", () =>
     await client.sendSubServiceRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      email,
-      name,
+      endUserName,
+      endUserEmail,
       orgName,
       serviceName,
       requestedSubServices,
@@ -121,8 +124,8 @@ describe("when sending an sub service request outcome to approvers email", () =>
       client.sendSubServiceRequestOutcomeToApprovers(
         organisationId,
         approverUserId,
-        email,
-        name,
+        endUserName,
+        endUserEmail,
         orgName,
         serviceName,
         requestedSubServices,

@@ -26,7 +26,7 @@ describe("when sending a user service has been removed email", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and correct type", async () => {
     await client.sendUserServiceRemoved(
       email,
       firstName,
@@ -37,18 +37,6 @@ describe("when sending a user service has been removed email", () => {
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of useraddedtoorganisationrequest_v1", async () => {
-    await client.sendUserServiceRemoved(
-      email,
-      firstName,
-      lastName,
-      serviceName,
-      orgName,
-    );
-
-    expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("userserviceremoved_v1");
   });
 
@@ -62,31 +50,9 @@ describe("when sending a user service has been removed email", () => {
     );
 
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-  });
-
-  test("then it should create job with data including firstName", async () => {
-    await client.sendUserServiceRemoved(
-      email,
-      firstName,
-      lastName,
-      serviceName,
-      orgName,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
     );
-  });
-
-  test("then it should create job with data including lastName", async () => {
-    await client.sendUserServiceRemoved(
-      email,
-      firstName,
-      lastName,
-      serviceName,
-      orgName,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );

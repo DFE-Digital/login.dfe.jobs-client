@@ -13,16 +13,15 @@ const { Queue } = require("bullmq");
 
 describe("when sending an service approved to approvers email", () => {
   const connectionString = "some-redis-connection";
-  const email = "user.one@unit.test";
-  const firstName = "User";
-  const lastName = "One";
+  const organisationId = "org-1";
+  const approverUserId = "approver-1";
+  const endUserName = "User One";
+  const endUserEmail = "user.one@unit.test";
   const orgName = "testOrg";
-  const serviceName = "testServiceName";
+  const requestedServiceName = "testServiceName";
   const requestedSubServices = ["test-sub-service"];
-  const permission = {
-    id: 0,
-    name: "End user",
-  };
+  const approved = true;
+  const reason = undefined;
 
   let client;
 
@@ -32,56 +31,79 @@ describe("when sending an service approved to approvers email", () => {
   });
 
   test("then it should create queue connecting to provided connection string and template", async () => {
-    await client.sendServiceRequestApprovedToApprovers(
-      email,
-      firstName,
-      lastName,
+    await client.sendServiceRequestOutcomeToApprovers(
+      organisationId,
+      approverUserId,
+      endUserName,
+      endUserEmail,
       orgName,
-      serviceName,
+      requestedServiceName,
       requestedSubServices,
-      permission,
+      approved,
+      reason,
     );
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe(
-      "user_service_request_approved_to_approvers",
+      "user_service_request_outcome_to_approvers",
     );
   });
 
   test("then it should create job with expected data", async () => {
-    await client.sendServiceRequestApprovedToApprovers(
-      email,
-      firstName,
-      lastName,
+    await client.sendServiceRequestOutcomeToApprovers(
+      organisationId,
+      approverUserId,
+      endUserName,
+      endUserEmail,
       orgName,
-      serviceName,
+      requestedServiceName,
       requestedSubServices,
-      permission,
+      approved,
+      reason,
     );
 
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
-      firstName,
+    expect(
+      Queue.mock.results[0].value.add.mock.calls[0][1].organisationId,
+    ).toBe(organisationId);
+    expect(
+      Queue.mock.results[0].value.add.mock.calls[0][1].approverUserId,
+    ).toBe(approverUserId);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
+      endUserName,
     );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
-      lastName,
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserEmail).toBe(
+      endUserEmail,
     );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].permission).toBe(
-      permission,
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
+      orgName,
+    );
+    expect(
+      Queue.mock.results[0].value.add.mock.calls[0][1].requestedServiceName,
+    ).toBe(requestedServiceName);
+    expect(
+      Queue.mock.results[0].value.add.mock.calls[0][1].requestedSubServices,
+    ).toBe(requestedSubServices);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].approved).toBe(
+      approved,
+    );
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].reason).toBe(
+      reason,
     );
   });
 
   test("then it should save the job", async () => {
-    await client.sendServiceRequestApprovedToApprovers(
-      email,
-      firstName,
-      lastName,
+    await client.sendServiceRequestOutcomeToApprovers(
+      organisationId,
+      approverUserId,
+      endUserName,
+      endUserEmail,
       orgName,
-      serviceName,
+      requestedServiceName,
       requestedSubServices,
-      permission,
+      approved,
+      reason,
     );
 
     expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
@@ -99,14 +121,16 @@ describe("when sending an service approved to approvers email", () => {
     });
 
     await expect(
-      client.sendServiceRequestApprovedToApprovers(
-        email,
-        firstName,
-        lastName,
+      client.sendServiceRequestOutcomeToApprovers(
+        organisationId,
+        approverUserId,
+        endUserName,
+        endUserEmail,
         orgName,
-        serviceName,
+        requestedServiceName,
         requestedSubServices,
-        permission,
+        approved,
+        reason,
       ),
     ).rejects.toBeDefined();
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);

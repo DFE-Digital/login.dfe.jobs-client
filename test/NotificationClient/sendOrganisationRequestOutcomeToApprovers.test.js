@@ -15,8 +15,8 @@ describe("when sending an organisation request outcome to approvers email", () =
   const connectionString = "some-redis-connection";
   const organisationId = "org-1";
   const approverUserId = "approver-1";
-  const email = "user.one@unit.test";
-  const name = "Test Tester";
+  const endUserEmail = "user.one@unit.test";
+  const endUserName = "Test Tester";
   const orgName = "My Org";
   const approved = true;
   const reason = "reason";
@@ -32,8 +32,8 @@ describe("when sending an organisation request outcome to approvers email", () =
     await client.sendOrganisationRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      email,
-      name,
+      endUserEmail,
+      endUserName,
       orgName,
       approved,
       reason,
@@ -51,8 +51,8 @@ describe("when sending an organisation request outcome to approvers email", () =
     await client.sendOrganisationRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      email,
-      name,
+      endUserName,
+      endUserEmail,
       orgName,
       approved,
       reason,
@@ -64,8 +64,8 @@ describe("when sending an organisation request outcome to approvers email", () =
         organisationId: "org-1",
         approverUserId: "approver-1",
         approved: true,
-        email: "user.one@unit.test",
-        name: "Test Tester",
+        endUserName: "Test Tester",
+        endUserEmail: "user.one@unit.test",
         orgName: "My Org",
         reason: "reason",
       },
@@ -85,8 +85,8 @@ describe("when sending an organisation request outcome to approvers email", () =
     await client.sendOrganisationRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      email,
-      name,
+      endUserName,
+      endUserEmail,
       orgName,
       approved,
       reason,
@@ -101,8 +101,8 @@ describe("when sending an organisation request outcome to approvers email", () =
       client.sendOrganisationRequestOutcomeToApprovers(
         organisationId,
         approverUserId,
-        email,
-        name,
+        endUserName,
+        endUserEmail,
         orgName,
         approved,
         reason,
@@ -124,8 +124,8 @@ describe("when sending an organisation request outcome to approvers email", () =
       client.sendOrganisationRequestOutcomeToApprovers(
         organisationId,
         approverUserId,
-        email,
-        name,
+        endUserName,
+        endUserEmail,
         orgName,
         approved,
         reason,

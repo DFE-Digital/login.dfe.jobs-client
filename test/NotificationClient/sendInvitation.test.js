@@ -28,26 +28,12 @@ describe("when sending an invitation", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and correct type", async () => {
     await client.sendInvitation(email, firstName, lastName, invitationId, code);
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of invitation_v2", async () => {
-    await client.sendInvitation(
-      email,
-      firstName,
-      lastName,
-      invitationId,
-      code,
-      serviceName,
-      selfInvoked,
-    );
-
-    expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("invitation_v2");
   });
 
@@ -89,7 +75,7 @@ describe("when sending an invitation", () => {
     );
   });
 
-  test("then it should create job with data including first name", async () => {
+  test("then it should create job with expected data", async () => {
     await client.sendInvitation(
       email,
       firstName,
@@ -103,35 +89,9 @@ describe("when sending an invitation", () => {
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
     );
-  });
-
-  test("then it should create job with data including last name", async () => {
-    await client.sendInvitation(
-      email,
-      firstName,
-      lastName,
-      invitationId,
-      code,
-      serviceName,
-      selfInvoked,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );
-  });
-
-  test("then it should create job with data including code", async () => {
-    await client.sendInvitation(
-      email,
-      firstName,
-      lastName,
-      invitationId,
-      code,
-      serviceName,
-      selfInvoked,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].code).toBe(code);
   });
 

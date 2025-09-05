@@ -25,8 +25,8 @@ describe("when sending a user added to organisation email", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
-    await client.sendUserRemovedFromOrganisation(
+  test("then it should create queue connecting to provided connection string and correct type", async () => {
+    await client.sendUserAddedToOrganisation(
       email,
       firstName,
       lastName,
@@ -35,21 +35,10 @@ describe("when sending a user added to organisation email", () => {
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of useraddedtoorganisationrequest_v1", async () => {
-    await client.sendUserAddedToOrganisation(
-      email,
-      firstName,
-      lastName,
-      orgName,
-    );
-
-    expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("useraddedtoorganisationrequest_v1");
   });
 
-  test("then it should create job with data including email", async () => {
+  test("then it should create job with expected data", async () => {
     await client.sendUserAddedToOrganisation(
       email,
       firstName,
@@ -58,29 +47,9 @@ describe("when sending a user added to organisation email", () => {
     );
 
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-  });
-
-  test("then it should create job with data including firstName", async () => {
-    await client.sendUserAddedToOrganisation(
-      email,
-      firstName,
-      lastName,
-      orgName,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
     );
-  });
-
-  test("then it should create job with data including lastName", async () => {
-    await client.sendUserAddedToOrganisation(
-      email,
-      firstName,
-      lastName,
-      orgName,
-    );
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );
