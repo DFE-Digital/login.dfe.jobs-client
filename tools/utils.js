@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const NotificationClient = require("./../lib/");
+const NotificationClient = require("./../lib/NotificationClient");
 const { promisify } = require("util");
 
 const readConfig = async () => {

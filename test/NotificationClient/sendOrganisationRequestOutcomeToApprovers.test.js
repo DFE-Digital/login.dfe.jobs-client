@@ -15,8 +15,8 @@ describe("when sending an organisation request outcome to approvers email", () =
   const connectionString = "some-redis-connection";
   const organisationId = "org-1";
   const approverUserId = "approver-1";
-  const endUserEmail = "user.one@unit.test";
   const endUserName = "Test Tester";
+  const endUserEmail = "user.one@unit.test";
   const orgName = "My Org";
   const approved = true;
   const reason = "reason";
@@ -51,8 +51,8 @@ describe("when sending an organisation request outcome to approvers email", () =
     await client.sendOrganisationRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      endUserName,
       endUserEmail,
+      endUserName,
       orgName,
       approved,
       reason,
@@ -85,8 +85,8 @@ describe("when sending an organisation request outcome to approvers email", () =
     await client.sendOrganisationRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      endUserName,
       endUserEmail,
+      endUserName,
       orgName,
       approved,
       reason,
@@ -101,8 +101,8 @@ describe("when sending an organisation request outcome to approvers email", () =
       client.sendOrganisationRequestOutcomeToApprovers(
         organisationId,
         approverUserId,
-        endUserName,
         endUserEmail,
+        endUserName,
         orgName,
         approved,
         reason,
@@ -124,8 +124,8 @@ describe("when sending an organisation request outcome to approvers email", () =
       client.sendOrganisationRequestOutcomeToApprovers(
         organisationId,
         approverUserId,
-        endUserName,
         endUserEmail,
+        endUserName,
         orgName,
         approved,
         reason,

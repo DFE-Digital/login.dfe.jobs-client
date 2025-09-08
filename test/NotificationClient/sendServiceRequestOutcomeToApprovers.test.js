@@ -15,8 +15,8 @@ describe("when sending an service approved to approvers email", () => {
   const connectionString = "some-redis-connection";
   const organisationId = "org-1";
   const approverUserId = "approver-1";
-  const endUserName = "User One";
   const endUserEmail = "user.one@unit.test";
+  const endUserName = "User One";
   const orgName = "testOrg";
   const requestedServiceName = "testServiceName";
   const requestedSubServices = ["test-sub-service"];
@@ -34,8 +34,8 @@ describe("when sending an service approved to approvers email", () => {
     await client.sendServiceRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      endUserName,
       endUserEmail,
+      endUserName,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -55,8 +55,8 @@ describe("when sending an service approved to approvers email", () => {
     await client.sendServiceRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      endUserName,
       endUserEmail,
+      endUserName,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -70,11 +70,11 @@ describe("when sending an service approved to approvers email", () => {
     expect(
       Queue.mock.results[0].value.add.mock.calls[0][1].approverUserId,
     ).toBe(approverUserId);
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
-      endUserName,
-    );
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserEmail).toBe(
       endUserEmail,
+    );
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
+      endUserName,
     );
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
       orgName,
@@ -97,8 +97,8 @@ describe("when sending an service approved to approvers email", () => {
     await client.sendServiceRequestOutcomeToApprovers(
       organisationId,
       approverUserId,
-      endUserName,
       endUserEmail,
+      endUserName,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -124,8 +124,8 @@ describe("when sending an service approved to approvers email", () => {
       client.sendServiceRequestOutcomeToApprovers(
         organisationId,
         approverUserId,
-        endUserName,
         endUserEmail,
+        endUserName,
         orgName,
         requestedServiceName,
         requestedSubServices,
