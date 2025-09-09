@@ -13,10 +13,10 @@ const { Queue } = require("bullmq");
 
 describe("when sending an sub service request outcome to approvers email", () => {
   const connectionString = "some-redis-connection";
-  const organisationId = "org-1";
   const approverUserId = "approver-1";
   const endUserEmail = "jane.doe@unit.test";
   const endUserName = "Jane Doe";
+  const organisationId = "org-1";
   const orgName = "Test Organisation";
   const serviceName = "Test ServiceName";
   const requestedSubServices = ["test-sub-service"];
@@ -32,10 +32,10 @@ describe("when sending an sub service request outcome to approvers email", () =>
 
   test("then it should create queue connecting to provided connection string and template", async () => {
     await client.sendSubServiceRequestOutcomeToApprovers(
-      organisationId,
       approverUserId,
       endUserEmail,
       endUserName,
+      organisationId,
       orgName,
       serviceName,
       requestedSubServices,
@@ -53,10 +53,10 @@ describe("when sending an sub service request outcome to approvers email", () =>
 
   test("then it should create job with expected data", async () => {
     await client.sendSubServiceRequestOutcomeToApprovers(
-      organisationId,
       approverUserId,
       endUserEmail,
       endUserName,
+      organisationId,
       orgName,
       serviceName,
       requestedSubServices,
@@ -96,10 +96,10 @@ describe("when sending an sub service request outcome to approvers email", () =>
 
   test("then it should save the job", async () => {
     await client.sendSubServiceRequestOutcomeToApprovers(
-      organisationId,
       approverUserId,
       endUserEmail,
       endUserName,
+      organisationId,
       orgName,
       serviceName,
       requestedSubServices,
@@ -123,10 +123,10 @@ describe("when sending an sub service request outcome to approvers email", () =>
 
     await expect(
       client.sendSubServiceRequestOutcomeToApprovers(
-        organisationId,
         approverUserId,
         endUserEmail,
         endUserName,
+        organisationId,
         orgName,
         serviceName,
         requestedSubServices,

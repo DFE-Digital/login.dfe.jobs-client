@@ -13,10 +13,10 @@ const { Queue } = require("bullmq");
 
 describe("when sending an service approved to approvers email", () => {
   const connectionString = "some-redis-connection";
-  const organisationId = "org-1";
   const approverUserId = "approver-1";
   const endUserEmail = "user.one@unit.test";
   const endUserName = "User One";
+  const organisationId = "org-1";
   const orgName = "testOrg";
   const requestedServiceName = "testServiceName";
   const requestedSubServices = ["test-sub-service"];
@@ -32,10 +32,10 @@ describe("when sending an service approved to approvers email", () => {
 
   test("then it should create queue connecting to provided connection string and template", async () => {
     await client.sendServiceRequestOutcomeToApprovers(
-      organisationId,
       approverUserId,
       endUserEmail,
       endUserName,
+      organisationId,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -53,10 +53,10 @@ describe("when sending an service approved to approvers email", () => {
 
   test("then it should create job with expected data", async () => {
     await client.sendServiceRequestOutcomeToApprovers(
-      organisationId,
       approverUserId,
       endUserEmail,
       endUserName,
+      organisationId,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -95,10 +95,10 @@ describe("when sending an service approved to approvers email", () => {
 
   test("then it should save the job", async () => {
     await client.sendServiceRequestOutcomeToApprovers(
-      organisationId,
       approverUserId,
       endUserEmail,
       endUserName,
+      organisationId,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -122,10 +122,10 @@ describe("when sending an service approved to approvers email", () => {
 
     await expect(
       client.sendServiceRequestOutcomeToApprovers(
-        organisationId,
         approverUserId,
         endUserEmail,
         endUserName,
+        organisationId,
         orgName,
         requestedServiceName,
         requestedSubServices,
