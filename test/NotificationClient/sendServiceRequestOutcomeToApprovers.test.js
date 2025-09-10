@@ -46,9 +46,7 @@ describe("when sending an service approved to approvers email", () => {
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
     expect(Queue.mock.calls.length).toBe(1);
-    expect(Queue.mock.calls[0][0]).toBe(
-      "user_service_request_outcome_to_approvers",
-    );
+    expect(Queue.mock.calls[0][0]).toBe("service_request_outcome_to_approvers");
   });
 
   test("then it should create job with expected data", async () => {
