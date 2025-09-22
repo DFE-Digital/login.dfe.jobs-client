@@ -16,7 +16,7 @@ describe("when sending an sub service request outcome to approvers email", () =>
   const approverUserId = "approver-1";
   const endUserEmail = "jane.doe@unit.test";
   const endUserName = "Jane Doe";
-  const organisationId = "org-1";
+  const orgId = "org-1";
   const orgName = "Test Organisation";
   const serviceName = "Test ServiceName";
   const requestedSubServices = ["test-sub-service"];
@@ -35,7 +35,7 @@ describe("when sending an sub service request outcome to approvers email", () =>
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       serviceName,
       requestedSubServices,
@@ -56,7 +56,7 @@ describe("when sending an sub service request outcome to approvers email", () =>
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       serviceName,
       requestedSubServices,
@@ -64,9 +64,6 @@ describe("when sending an sub service request outcome to approvers email", () =>
       reason,
     );
 
-    expect(
-      Queue.mock.results[0].value.add.mock.calls[0][1].organisationId,
-    ).toBe(organisationId);
     expect(
       Queue.mock.results[0].value.add.mock.calls[0][1].approverUserId,
     ).toBe(approverUserId);
@@ -76,7 +73,7 @@ describe("when sending an sub service request outcome to approvers email", () =>
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
       endUserName,
     );
-
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgId).toBe(orgId);
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
       orgName,
     );
@@ -99,7 +96,7 @@ describe("when sending an sub service request outcome to approvers email", () =>
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       serviceName,
       requestedSubServices,
@@ -126,7 +123,7 @@ describe("when sending an sub service request outcome to approvers email", () =>
         approverUserId,
         endUserEmail,
         endUserName,
-        organisationId,
+        orgId,
         orgName,
         serviceName,
         requestedSubServices,

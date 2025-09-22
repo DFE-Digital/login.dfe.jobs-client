@@ -16,7 +16,7 @@ describe("when sending an organisation request outcome to approvers email", () =
   const approverUserId = "approver-1";
   const endUserName = "Test Tester";
   const endUserEmail = "user.one@unit.test";
-  const organisationId = "org-1";
+  const orgId = "org-1";
   const orgName = "My Org";
   const approved = true;
   const reason = "reason";
@@ -33,7 +33,7 @@ describe("when sending an organisation request outcome to approvers email", () =
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       approved,
       reason,
@@ -52,7 +52,7 @@ describe("when sending an organisation request outcome to approvers email", () =
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       approved,
       reason,
@@ -65,7 +65,7 @@ describe("when sending an organisation request outcome to approvers email", () =
         approved: true,
         endUserName: "Test Tester",
         endUserEmail: "user.one@unit.test",
-        organisationId: "org-1",
+        orgId: "org-1",
         orgName: "My Org",
         reason: "reason",
       },
@@ -86,7 +86,7 @@ describe("when sending an organisation request outcome to approvers email", () =
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       approved,
       reason,
@@ -102,7 +102,7 @@ describe("when sending an organisation request outcome to approvers email", () =
         approverUserId,
         endUserEmail,
         endUserName,
-        organisationId,
+        orgId,
         orgName,
         approved,
         reason,
@@ -125,7 +125,7 @@ describe("when sending an organisation request outcome to approvers email", () =
         approverUserId,
         endUserEmail,
         endUserName,
-        organisationId,
+        orgId,
         orgName,
         approved,
         reason,

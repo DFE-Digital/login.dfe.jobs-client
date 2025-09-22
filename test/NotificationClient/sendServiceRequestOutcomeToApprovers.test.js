@@ -16,7 +16,7 @@ describe("when sending an service approved to approvers email", () => {
   const approverUserId = "approver-1";
   const endUserEmail = "user.one@unit.test";
   const endUserName = "User One";
-  const organisationId = "org-1";
+  const orgId = "org-1";
   const orgName = "testOrg";
   const requestedServiceName = "testServiceName";
   const requestedSubServices = ["test-sub-service"];
@@ -35,7 +35,7 @@ describe("when sending an service approved to approvers email", () => {
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -54,7 +54,7 @@ describe("when sending an service approved to approvers email", () => {
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -62,9 +62,6 @@ describe("when sending an service approved to approvers email", () => {
       reason,
     );
 
-    expect(
-      Queue.mock.results[0].value.add.mock.calls[0][1].organisationId,
-    ).toBe(organisationId);
     expect(
       Queue.mock.results[0].value.add.mock.calls[0][1].approverUserId,
     ).toBe(approverUserId);
@@ -74,6 +71,7 @@ describe("when sending an service approved to approvers email", () => {
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
       endUserName,
     );
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgId).toBe(orgId);
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
       orgName,
     );
@@ -96,7 +94,7 @@ describe("when sending an service approved to approvers email", () => {
       approverUserId,
       endUserEmail,
       endUserName,
-      organisationId,
+      orgId,
       orgName,
       requestedServiceName,
       requestedSubServices,
@@ -123,7 +121,7 @@ describe("when sending an service approved to approvers email", () => {
         approverUserId,
         endUserEmail,
         endUserName,
-        organisationId,
+        orgId,
         orgName,
         requestedServiceName,
         requestedSubServices,

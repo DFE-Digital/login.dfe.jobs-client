@@ -37,7 +37,7 @@ The client then has methods for sending notifications. All methods return promis
 
 ## Developing
 
-When making a to any of the clients, you're likely going to also need to make a corresponding change in [login.dfe.jobs](https://github.com/DFE-Digital/login.dfe.jobs)
+When making a change to any of the clients, you're likely going to also need to make a corresponding change in [login.dfe.jobs](https://github.com/DFE-Digital/login.dfe.jobs)
 
 ### Testing
 
