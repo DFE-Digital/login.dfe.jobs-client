@@ -25,45 +25,24 @@ describe("when sending a notification of change of email", () => {
     client = new NotificationClient({ connectionString: connectionString });
   });
 
-  test("then it should create queue connecting to provided connection string", async () => {
+  test("then it should create queue connecting to provided connection string and correct type", async () => {
     await client.sendNotifyMigratedEmail(email, firstName, lastName, newEmail);
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
-  });
-
-  test("then it should create job with type of notifychangeemail_v1", async () => {
-    await client.sendNotifyMigratedEmail(email, firstName, lastName, newEmail);
-
-    expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][0]).toBe("notifychangeemail_v1");
   });
 
-  test("then it should create job with data including email", async () => {
+  test("then it should create job with expected data", async () => {
     await client.sendNotifyMigratedEmail(email, firstName, lastName, newEmail);
 
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-  });
-
-  test("then it should create job with data including first name", async () => {
-    await client.sendNotifyMigratedEmail(email, firstName, lastName, newEmail);
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
       firstName,
     );
-  });
-
-  test("then it should create job with data including last name", async () => {
-    await client.sendNotifyMigratedEmail(email, firstName, lastName, newEmail);
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
       lastName,
     );
-  });
-
-  test("then it should create job with data including newEmail", async () => {
-    await client.sendNotifyMigratedEmail(email, firstName, lastName, newEmail);
-
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].newEmail).toBe(
       newEmail,
     );

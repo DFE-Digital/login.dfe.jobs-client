@@ -73,4 +73,27 @@ describe("when sending publicinvitationcomplete_v1", () => {
     ).rejects.toBeDefined();
     expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
   });
+
+  it("then it should raise an exception if the add function errors", async () => {
+    Queue.mockImplementation(() => {
+      return {
+        add: jest.fn().mockImplementation(() => {
+          throw new Error("bad times adding");
+        }),
+        close: jest.fn(),
+      };
+    });
+
+    expect.assertions(3);
+    client
+      .sendInvitationComplete(userId, callbacks)
+      .catch((error) =>
+        expect(error.message).toBe(
+          "PublicApiClient: Error while adding message to redis queue - {}",
+        ),
+      );
+
+    expect(Queue.mock.results[0].value.add).toHaveBeenCalledTimes(1);
+    expect(Queue.mock.results[0].value.close).toHaveBeenCalledTimes(1);
+  });
 });

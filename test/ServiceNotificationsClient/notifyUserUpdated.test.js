@@ -78,4 +78,24 @@ describe("when sending userupdated_v1", () => {
     await expect(client.notifyUserUpdated(user)).rejects.toThrow("bad times");
     expect(Queue.mock.results[0].value.close.mock.calls.length).toBe(1);
   });
+
+  it("should error the user is not provided", async () => {
+    const emptyUser = undefined;
+
+    expect.assertions(1);
+    await expect(client.notifyUserUpdated(emptyUser)).rejects.toThrow(
+      "User must be provided",
+    );
+  });
+
+  it("should error the user is not provided", async () => {
+    const userWithoutSub = {
+      email: "testuser@test.com",
+    };
+
+    expect.assertions(1);
+    await expect(client.notifyUserUpdated(userWithoutSub)).rejects.toThrow(
+      "User must have sub",
+    );
+  });
 });

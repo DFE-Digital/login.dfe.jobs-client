@@ -35,6 +35,18 @@ const client = new ServiceNotificationsClient({
 
 The client then has methods for sending notifications. All methods return promises.
 
+## Developing
+
+When making a change to any of the clients, you're likely going to also need to make a corresponding change in [login.dfe.jobs](https://github.com/DFE-Digital/login.dfe.jobs)
+
+### Testing
+
+To run the unit tests
+
+```
+npm run test
+```
+
 ## Notifications
 
 ### Password reset

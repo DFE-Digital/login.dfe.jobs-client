@@ -11,15 +11,17 @@ jest.mock("bullmq", () => {
 
 const { Queue } = require("bullmq");
 
-describe("when sending an sub service request rejected email", () => {
+describe("when sending an service approved to approvers email", () => {
   const connectionString = "some-redis-connection";
-  const email = "jane.doe@unit.test";
-  const firstName = "Jane";
-  const lastName = "Doe";
-  const orgName = "Test Organisation";
-  const serviceName = "Test ServiceName";
+  const approverUserId = "approver-1";
+  const endUserEmail = "user.one@unit.test";
+  const endUserName = "User One";
+  const orgId = "org-1";
+  const orgName = "testOrg";
+  const requestedServiceName = "testServiceName";
   const requestedSubServices = ["test-sub-service"];
-  const reason = "Not allowed";
+  const approved = true;
+  const reason = undefined;
 
   let client;
 
@@ -29,62 +31,74 @@ describe("when sending an sub service request rejected email", () => {
   });
 
   test("then it should create queue connecting to provided connection string and template", async () => {
-    await client.sendSubServiceRequestRejected(
-      email,
-      firstName,
-      lastName,
+    await client.sendServiceRequestOutcomeToApprovers(
+      approverUserId,
+      endUserEmail,
+      endUserName,
+      orgId,
       orgName,
-      serviceName,
+      requestedServiceName,
       requestedSubServices,
+      approved,
       reason,
     );
 
     expect(Queue.mock.calls.length).toBe(1);
     expect(Queue.mock.calls[0][1].connection.url).toBe(connectionString);
     expect(Queue.mock.calls.length).toBe(1);
-    expect(Queue.mock.calls[0][0]).toBe("sub_service_request_rejected");
+    expect(Queue.mock.calls[0][0]).toBe("service_request_outcome_to_approvers");
   });
 
   test("then it should create job with expected data", async () => {
-    await client.sendSubServiceRequestRejected(
-      email,
-      firstName,
-      lastName,
+    await client.sendServiceRequestOutcomeToApprovers(
+      approverUserId,
+      endUserEmail,
+      endUserName,
+      orgId,
       orgName,
-      serviceName,
+      requestedServiceName,
       requestedSubServices,
+      approved,
       reason,
     );
 
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].email).toBe(email);
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].firstName).toBe(
-      firstName,
+    expect(
+      Queue.mock.results[0].value.add.mock.calls[0][1].approverUserId,
+    ).toBe(approverUserId);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserEmail).toBe(
+      endUserEmail,
     );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].lastName).toBe(
-      lastName,
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].endUserName).toBe(
+      endUserName,
     );
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgId).toBe(orgId);
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].orgName).toBe(
       orgName,
     );
-    expect(Queue.mock.results[0].value.add.mock.calls[0][1].serviceName).toBe(
-      serviceName,
-    );
+    expect(
+      Queue.mock.results[0].value.add.mock.calls[0][1].requestedServiceName,
+    ).toBe(requestedServiceName);
     expect(
       Queue.mock.results[0].value.add.mock.calls[0][1].requestedSubServices,
     ).toBe(requestedSubServices);
+    expect(Queue.mock.results[0].value.add.mock.calls[0][1].approved).toBe(
+      approved,
+    );
     expect(Queue.mock.results[0].value.add.mock.calls[0][1].reason).toBe(
       reason,
     );
   });
 
   test("then it should save the job", async () => {
-    await client.sendSubServiceRequestRejected(
-      email,
-      firstName,
-      lastName,
+    await client.sendServiceRequestOutcomeToApprovers(
+      approverUserId,
+      endUserEmail,
+      endUserName,
+      orgId,
       orgName,
-      serviceName,
+      requestedServiceName,
       requestedSubServices,
+      approved,
       reason,
     );
 
@@ -103,13 +117,15 @@ describe("when sending an sub service request rejected email", () => {
     });
 
     await expect(
-      client.sendSubServiceRequestRejected(
-        email,
-        firstName,
-        lastName,
+      client.sendServiceRequestOutcomeToApprovers(
+        approverUserId,
+        endUserEmail,
+        endUserName,
+        orgId,
         orgName,
-        serviceName,
+        requestedServiceName,
         requestedSubServices,
+        approved,
         reason,
       ),
     ).rejects.toBeDefined();
